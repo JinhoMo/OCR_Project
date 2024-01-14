@@ -22,7 +22,7 @@ rectangle(i, '/content/table/test2_0.jpg')
 #### predict
 This function predicts and crop nutrition table of input image.
 Crop box size can be changed by controlling box_size_up, ratio variables.
-Cropped image is saved in  here : (img_save_dir)/table/(img_save_name)_i
+Cropped image is saved in  here : `(img_save_dir)/table/(img_save_name)_i`
 This path can be changes by modifying the codes below.
     
 Args:
