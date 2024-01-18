@@ -57,7 +57,7 @@ Args:
 Returns:
 - Input image(If image rotation is not required) or Deskew image(if image rotation is required) or False(if there is err)
 
-### Doctr(Doctr/inference)
+### warpping
 This function unfolds crumpled or round-shaped image.
 * Use "DocTr" git (https://github.com/fh2019ustc/DocTr.git)
   
