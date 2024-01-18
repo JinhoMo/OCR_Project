@@ -17,6 +17,12 @@ model = YOLO('/content/drive/MyDrive/yolo_re/100ep/best.pt')  # load a custom mo
 
 i= predict(model, '/content/KakaoTalk_20231120_024232761_26.jpg', img_save_name = 'test2')
 rectangle(i, '/content/table/test2_0.jpg')
+
++
+- !pip install timm
+- !pip install deskew
+* In DocTr/inference.py -> def inference() : there are model paths required for Doctor.
+please edit it to your location Absolute path. (the models are in DocTr/model_pretrained/)
 ```
 
 #### predict
@@ -25,17 +31,35 @@ Crop box size can be changed by controlling box_size_up, ratio variables.
 Cropped image is saved in  here : `(img_save_dir)/table/(img_save_name)_i`
 This path can be changes by modifying the codes below.
     
+
 Args:
-- model (yolo model): YOLO model
-- input (str): input image path. EX) 'dir/name.jpg'
-- img_save_dir (str, optional):  Defaults to './'.
-- img_save_name (str, optional): Defaults to './test'.
-- box_size_up (bool, optional):  True if use DocTr and need crop box size up. Defaults to False.
-- box_txt_save_path (str, optional): optinally needed when box_size_up is True. Defaults to './test.txt'.
-- ratio (float, optional): box size up ratio. Defaults to 0.2.
+  model (yolo model): YOLO model
+  img (numpy image): input image  
+  img_save_dir (str, optional):  Defaults to './'.
+  img_save_name (str, optional): Defaults to './test'.
+  box_size_up (bool, optional):  True if use DocTr and need crop box size up. Defaults to False.
+  box_txt_save_path (str, optional): optinally needed when box_size_up is True. Defaults to './test.txt'.
+  ratio (float, optional): box size up ratio. Defaults to 0.2.
 
 Returns:
-- i (int): # of cropped image of input. typically one, but can be more if model predicts multiple tables.
+    i (int): # of cropped image of input. typically one, but can be more if model predicts multiple tables.
+
+### rotate
+This function rotates image straight.
+If the angle of inclination is less than 10, do not rotate,
+But if it is more than 10, rotation is applied.  
+    
+Args: 
+- image (numpy image): Input image  
+- image_save_path (str):  Path to save 
+- i (int): Box number detected
+
+Returns:
+- Input image(If image rotation is not required) or Deskew image(if image rotation is required) or False(if there is err)
+
+### Doctr(Doctr/inference)
+This function unfolds crumpled or round-shaped image.
+* Use "DocTr" git (https://github.com/fh2019ustc/DocTr.git)
   
 #### rectangle
 This functon makes cropped image to rectangular image.
@@ -55,9 +79,8 @@ Original image's height and width info is saved in json format file.
     }
 ```
 Args:
-- i (int, optional): # of cropped image of input. Defaults to 0.
-- img_save_path (str, optional): give one of cropped images' path.  Defaults to './test_0.jpg'.
-- json_path (str, optional): height and width of images are saved in this file. Defaults to './test.json'.
-        
+- image (numpy image): Input image
+- img_save_path (str): give one of cropped images' path.  Defaults to './test_0.jpg'.
+- i (int): # of cropped image of input. Defaults to 0.
 Returns:
-- bool: True if processed correctly. If False, there is no sufficient files to convert. 
+    bool: True if processed correctly. If False, there is no sufficient files to convert. 
