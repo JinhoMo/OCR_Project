@@ -38,7 +38,8 @@ def predict(model,
     
     i = 0
     # save crop file in 'img_save_dir'/table/'img_save_name'_i
-    for p in pred:
+    for pp in pred:
+      for p in pp:
         if(box_size_up):
             #save predicted box
             p.save_txt(box_txt_save_path)
