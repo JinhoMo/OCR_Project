@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OCR_Project
 Prometheus Deep-Learning OCR Porject
 
@@ -84,3 +85,21 @@ Args:
 - i (int): # of cropped image of input. Defaults to 0.
 Returns:
     bool: True if processed correctly. If False, there is no sufficient files to convert. 
+=======
+# ocrapp
+
+ocr front
+
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
+>>>>>>> 294fa78 (app)
