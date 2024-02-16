@@ -131,7 +131,7 @@ def rotate( image, image_save_path,i) :
       if size_changed:#restoring size
         image = cv2.resize(image, (w, h), interpolation=cv2.INTER_LINEAR)
 
-      if angle<10 and angle>-10:#temporary 10 -> can be changed
+      if (angle<3 and angle>-3) or angle>25 or angle<-25:#temporary 10 -> can be changed
         image = cv2.resize(image, (w, h), interpolation=cv2.INTER_LINEAR)
         print(str(i)+" is straight, Rotated is not applied")
         return image
