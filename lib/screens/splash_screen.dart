@@ -24,8 +24,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: FlutterLogo(size: 200),
+      body: Container(
+        color: Color(0xFFCCD7DB), // 주변 배경색 설정
+        child: Center(
+          child: Image(
+            image: AssetImage('assets/logo.jpg'),
+            width: 200, // 이미지의 너비 설정
+            height: 200, // 이미지의 높이 설정
+          ),
+        ),
       ),
     );
   }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ocrapp/models/event.dart';
-import 'package:ocrapp/widgets/event_list.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class TableCalendarScreen extends StatefulWidget {
   const TableCalendarScreen({Key? key}) : super(key: key);
@@ -15,15 +15,16 @@ class TableCalendarScreen extends StatefulWidget {
   State<TableCalendarScreen> createState() => _TableCalendarScreenState();
 }
 
-
 class _TableCalendarScreenState extends State<TableCalendarScreen> {
   Map<DateTime, List<Event>> eventsByDate = {};
   DateTime? selectedDay, focusedDay;
+  late Directory directory;
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
+    _getDirectory();
   }
 
   _loadEvents() async {
@@ -31,7 +32,7 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
     Map<String, dynamic>? eventsMap = prefs.getString('events') != null
         ? jsonDecode(prefs.getString('events')!)
         : null;
-
+    print(eventsMap);
     if (eventsMap != null) {
       eventsMap.forEach((dateString, eventsData) {
         DateTime date = DateTime.parse(dateString);
@@ -57,7 +58,6 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
   }
 
   _addEvent(DateTime date, Event event) {
-
     setState(() {
       if (!eventsByDate.containsKey(date)) {
         eventsByDate[date] = [];
@@ -74,6 +74,7 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
       }
 
       eventsByDate[date]!.add(event);
+      print(eventsByDate);
     });
     _saveEvents();
   }
@@ -93,7 +94,8 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
   }
 
   _showEditEventDialog(DateTime date, int index) async {
-    Event selectedEvent = eventsByDate[date]![index];
+    Event selectedEvent;
+    selectedEvent = eventsByDate[date]![index];
 
     TextEditingController carbsController = TextEditingController(text: selectedEvent.carbs.toString());
     TextEditingController proteinController = TextEditingController(text: selectedEvent.protein.toString());
@@ -104,24 +106,43 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Edit Event"),
-          content: Column(
-            children: [
-              TextField(
-                controller: carbsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Carbs"),
-              ),
-              TextField(
-                controller: proteinController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Protein"),
-              ),
-              TextField(
-                controller: fatController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Fat"),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: carbsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: "Carbs"),
+                ),
+                TextField(
+                  controller: proteinController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: "Protein"),
+                ),
+                TextField(
+                  controller: fatController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: "Fat"),
+                ),
+                Container(
+                  width: 150,
+                  height: 150,
+                  margin: EdgeInsets.all(8.0),
+                  color: Colors.grey,
+                  child: selectedEvent.image != null && selectedEvent.image.isNotEmpty
+                      ? Image.file(
+                    File('${directory.path}/${selectedEvent.image}.jpg'), // Assuming image file extension is jpg
+                    fit: BoxFit.cover,
+                  )
+                      : Center(
+                    child: Text(
+                      'No Image',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
@@ -137,7 +158,6 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
                 selectedEvent.protein = double.parse(proteinController.text);
                 selectedEvent.fat = double.parse(fatController.text);
 
-                // Update the events list and save
                 _editEvent(date, index, selectedEvent);
 
                 Navigator.of(context).pop();
@@ -151,7 +171,7 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
 
                 Navigator.of(context).pop();
               },
-              style: ElevatedButton.styleFrom(primary: Colors.red), // Red color for delete button
+              // style: ElevatedButton.styleFrom(primary: Colors.red), // Red color for delete button
               child: Text("Delete"),
             ),
           ],
@@ -160,38 +180,18 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
     );
   }
 
-  _showAddEventDialog(DateTime date) async {
-    Event newEvent = Event(image: "", number: eventsByDate[date]?.length ?? 0 + 1, carbs: 0.0, protein: 0.0, fat: 0.0);
 
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Add Event"),
-          content: Column(
-            children: [
-              // Add UI components for event data input
-              // (e.g., image, number, carbs, protein, fat)
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _addEvent(date, newEvent);
-                Navigator.of(context).pop();
-              },
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _getDirectory() async {
+    directory = await getApplicationDocumentsDirectory();
+    setState(() {}); // Rebuild the widget after getting the directory
+  }
+
+  int _getEventCount(DateTime date) {
+    if (eventsByDate.containsKey(date)) {
+      return eventsByDate[date]!.length;
+    } else {
+      return 0;
+    }
   }
 
   @override
@@ -206,8 +206,8 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
             lastDay: DateTime.utc(2030, 3, 14),
             focusedDay: DateTime.now(),
             headerStyle: HeaderStyle(
-              formatButtonVisible: false,
-            ),
+            formatButtonVisible: false,
+          ),
             calendarStyle: CalendarStyle(
               markerSize: 8.0,
               markerDecoration: BoxDecoration(
@@ -216,10 +216,26 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
               ),
               markerMargin: EdgeInsets.symmetric(horizontal: 1.0),
             ),
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                final eventCount = _getEventCount(date);
+                if (eventCount > 0) {
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Text(
+                      '$eventCount', // 이벤트 개수를 표시
+                      style: TextStyle(color: Colors.blue), // 적절한 스타일 적용
+                    ),
+                  );
+                } else {
+                  return Container(); // 이벤트 개수가 0이면 아무것도 반환하지 않음
+                }
+              },
+            ),
             onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
               setState(() {
-                this.selectedDay = selectedDay;
-                this.focusedDay = focusedDay;
+                this.selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+                this.focusedDay = DateTime(focusedDay.year, focusedDay.month, focusedDay.day);
               });
             },
             selectedDayPredicate: (DateTime day) {
@@ -230,15 +246,7 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
           _buildEventList(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          DateTime currentDate = DateTime.now();
-          DateTime dateOnly = DateTime(currentDate.year, currentDate.month, currentDate.day);
-          _showAddEventDialog(dateOnly);
-        },
-        child: Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
     );
   }
 
@@ -246,20 +254,47 @@ class _TableCalendarScreenState extends State<TableCalendarScreen> {
     if (selectedDay != null && eventsByDate.containsKey(selectedDay)) {
       List<Event> events = eventsByDate[selectedDay] ?? [];
 
-      return Expanded(
-        child: ListView.builder(
-          itemCount: events.length,
-          itemBuilder: (context, index) {
-            Event event = events[index];
-
-            return ListTile(
-              title: Text("Event ${index + 1}"),
-              onTap: () {
-                _showEditEventDialog(selectedDay!, index);
-              },
-            );
-          },
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              DateFormat('yyyy-MM-dd').format(selectedDay!), // Format the selected date as the title
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: events.map((event) {
+                return GestureDetector(
+                  onTap: () {
+                    _showEditEventDialog(selectedDay!, events.indexOf(event));
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    margin: EdgeInsets.all(8.0),
+                    color: Colors.grey,
+                    child: event.image != null && event.image.isNotEmpty
+                        ? Image.file(
+                      File('${directory.path}/${event.image}.jpg'), // Assuming image file extension is jpg
+                      fit: BoxFit.cover,
+                    )
+                        : Center(
+                      child: Text(
+                        'Event ${events.indexOf(event) + 1}',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       );
     } else {
       return Container();
