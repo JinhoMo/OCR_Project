@@ -86,11 +86,15 @@ Args:
 Returns:
     bool: True if processed correctly. If False, there is no sufficient files to convert. 
 =======
-# ocrapp
 
-ocr front
+---
+# APP
+- Front-End : Flutter
+- Back-End : Flask
 
-## Getting Started
+## ocr front
+
+### Getting Started
 
 This project is a starting point for a Flutter application.
 
@@ -103,3 +107,22 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 >>>>>>> 294fa78 (app)
+## Backend
+
+### Installation
+
+```
+pip install opencv-python 
+pip install flask 
+pip install tensorflow 
+pip install pillow 
+pip install --upgrade Werkzeug
+pip install flask_cors 
+pip install Flask-Reuploaded
+pip install ultralytics 
+pip install timm 
+pip install deskew 
+pip install opencv-contrib-python
+pip install --upgrade google-cloud-vision google-auth
+```
+
